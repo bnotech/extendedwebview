@@ -35,7 +35,8 @@ namespace Com.Bnotech.ExtendedWebView.Platforms.Android.Handlers;
             _jsBridgeHandler = new JSBridge(this);
 
             webView.Settings.JavaScriptEnabled = true;
-
+            webView.Settings.DomStorageEnabled = true;
+            
             webView.SetWebViewClient(new JavascriptWebViewClient($"javascript: {JavascriptFunction}", VirtualView));
             webView.AddJavascriptInterface(_jsBridgeHandler, "jsBridge");
 
