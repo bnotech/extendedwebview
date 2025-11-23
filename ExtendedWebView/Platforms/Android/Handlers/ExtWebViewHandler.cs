@@ -1,4 +1,6 @@
 ﻿using Android.Graphics;
+using AApp = Android.App;
+using AOS = Android.OS;
 using AWebKit = Android.Webkit;
 
 using Java.Interop;
@@ -36,8 +38,9 @@ namespace Com.Bnotech.ExtendedWebView.Platforms.Android.Handlers;
 
             webView.Settings.JavaScriptEnabled = true;
             webView.Settings.DomStorageEnabled = true;
-            
+
             webView.SetWebViewClient(new JavascriptWebViewClient($"javascript: {JavascriptFunction}", VirtualView));
+            webView.SetWebChromeClient(new MultiWindowWebChromeClient()); // Multi-Window Unterstützung
             webView.AddJavascriptInterface(_jsBridgeHandler, "jsBridge");
 
             if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
@@ -146,5 +149,37 @@ namespace Com.Bnotech.ExtendedWebView.Platforms.Android.Handlers;
             {
                 hybridRenderer.VirtualView.InvokeAction(data);
             }
+        }
+    }
+
+    public class MultiWindowWebChromeClient : AWebKit.WebChromeClient
+    {
+        private AApp.AlertDialog? _dialog;
+
+        public override bool OnCreateWindow(AWebKit.WebView view, bool isDialog, bool isUserGesture, AOS.Message resultMsg)
+        {
+            var newWebView = new AWebKit.WebView(view.Context);
+            newWebView.Settings.JavaScriptEnabled = true;
+            newWebView.Settings.DomStorageEnabled = true;
+            newWebView.SetWebChromeClient(this);
+
+            var transport = (AWebKit.WebView.WebViewTransport)resultMsg.Obj;
+            transport.WebView = newWebView;
+            resultMsg.SendToTarget();
+
+            _dialog = new AApp.AlertDialog.Builder(view.Context)
+                .SetView(newWebView)
+                .SetPositiveButton("X", (sender, args) => newWebView.Destroy())
+                .Create();
+            _dialog.Show();
+
+            return true;
+        }
+
+        public override void OnCloseWindow(AWebKit.WebView window)
+        {
+            window.Destroy();
+            _dialog?.Dismiss();
+            _dialog = null;
         }
     }
