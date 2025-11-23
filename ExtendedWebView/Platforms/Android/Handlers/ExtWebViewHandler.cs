@@ -1,4 +1,5 @@
 ﻿using Android.Graphics;
+using AOS = Android.OS;
 using AWebKit = Android.Webkit;
 
 using Java.Interop;
@@ -36,8 +37,9 @@ namespace Com.Bnotech.ExtendedWebView.Platforms.Android.Handlers;
 
             webView.Settings.JavaScriptEnabled = true;
             webView.Settings.DomStorageEnabled = true;
-            
+
             webView.SetWebViewClient(new JavascriptWebViewClient($"javascript: {JavascriptFunction}", VirtualView));
+            webView.SetWebChromeClient(new MultiWindowWebChromeClient()); // Multi-Window Unterstützung
             webView.AddJavascriptInterface(_jsBridgeHandler, "jsBridge");
 
             if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
@@ -146,5 +148,31 @@ namespace Com.Bnotech.ExtendedWebView.Platforms.Android.Handlers;
             {
                 hybridRenderer.VirtualView.InvokeAction(data);
             }
+        }
+    }
+
+    public class MultiWindowWebChromeClient : AWebKit.WebChromeClient
+    {
+        public override bool OnCreateWindow(AWebKit.WebView view, bool isDialog, bool isUserGesture,
+            AOS.Message resultMsg)
+        {
+            var newWebView = new AWebKit.WebView(view.Context);
+            newWebView.Settings.JavaScriptEnabled = true;
+            newWebView.Settings.DomStorageEnabled = true;
+
+            // Optional: Setze weitere Einstellungen oder Handler für das neue Fenster
+
+            var transport = (AWebKit.WebView.WebViewTransport)resultMsg.Obj;
+            transport.WebView = newWebView;
+            resultMsg.SendToTarget();
+
+            // Zeige das neue Fenster an (z.B. in einem Dialog oder einer neuen Activity)
+            // Hier nur ein einfaches Beispiel:
+            Android.App.AlertDialog.Builder builder = new Android.App.AlertDialog.Builder(view.Context);
+            builder.SetView(newWebView);
+            builder.SetPositiveButton("Schließen", (sender, args) => newWebView.Destroy());
+            builder.Show();
+
+            return true;
         }
     }
