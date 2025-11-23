@@ -1,4 +1,5 @@
 ﻿using Android.Graphics;
+using AApp = Android.App;
 using AOS = Android.OS;
 using AWebKit = Android.Webkit;
 
@@ -153,26 +154,32 @@ namespace Com.Bnotech.ExtendedWebView.Platforms.Android.Handlers;
 
     public class MultiWindowWebChromeClient : AWebKit.WebChromeClient
     {
-        public override bool OnCreateWindow(AWebKit.WebView view, bool isDialog, bool isUserGesture,
-            AOS.Message resultMsg)
+        private AApp.AlertDialog? _dialog;
+
+        public override bool OnCreateWindow(AWebKit.WebView view, bool isDialog, bool isUserGesture, AOS.Message resultMsg)
         {
             var newWebView = new AWebKit.WebView(view.Context);
             newWebView.Settings.JavaScriptEnabled = true;
             newWebView.Settings.DomStorageEnabled = true;
-
-            // Optional: Setze weitere Einstellungen oder Handler für das neue Fenster
+            newWebView.SetWebChromeClient(this);
 
             var transport = (AWebKit.WebView.WebViewTransport)resultMsg.Obj;
             transport.WebView = newWebView;
             resultMsg.SendToTarget();
 
-            // Zeige das neue Fenster an (z.B. in einem Dialog oder einer neuen Activity)
-            // Hier nur ein einfaches Beispiel:
-            Android.App.AlertDialog.Builder builder = new Android.App.AlertDialog.Builder(view.Context);
-            builder.SetView(newWebView);
-            builder.SetPositiveButton("Schließen", (sender, args) => newWebView.Destroy());
-            builder.Show();
+            _dialog = new AApp.AlertDialog.Builder(view.Context)
+                .SetView(newWebView)
+                .SetPositiveButton("X", (sender, args) => newWebView.Destroy())
+                .Create();
+            _dialog.Show();
 
             return true;
+        }
+
+        public override void OnCloseWindow(AWebKit.WebView window)
+        {
+            window.Destroy();
+            _dialog?.Dismiss();
+            _dialog = null;
         }
     }
