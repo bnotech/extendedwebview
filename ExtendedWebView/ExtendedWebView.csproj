@@ -7,7 +7,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>Com.Bnotech.ExtendedWebView</RootNamespace>
-        <MauiVersion>9.0.90</MauiVersion>
+        <MauiVersion>9.0.120</MauiVersion>
         
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">12.2</SupportedOSPlatformVersion>
         <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
@@ -23,7 +23,7 @@
         <Owners>bnotech</Owners>
         <Company>BNO Technology Solutions e.K.</Company>
         <Description>This package provides support for a extended WebView</Description>
-        <Copyright>©Copyright 2024, BNO Technology Solutions e.K.</Copyright>
+        <Copyright>©Copyright 2025, BNO Technology Solutions e.K.</Copyright>
         <Tags>WebView Extended ExtendedWebView</Tags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
